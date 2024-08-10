@@ -1,0 +1,161 @@
+% MATLAB script for solving PDEs using Galerkin finite element method
+% and plotting the results as described in the PDF document
+
+% Clear workspace and command window
+clear;
+clc;
+
+% Define parameters
+a = 1; % stretching rate
+We_values = [0.5, 1.0, 1.5]; % different Weissenberg numbers
+beta_values = [0.5, 1.0, 1.5]; % different magnetic numbers
+lambda_values = [0.5, 1.0, 1.5]; % different magnetic Prandtl numbers
+Hs_values = [0.5, 1.0, 1.5]; % different heat generation numbers
+Omega_a_values = [0.5, 1.0, 1.5]; % different time relaxation numbers
+
+% Solve the ODE system for different parameters and plot results
+eta_span = [0, 1.5];
+Y0 = [0; 1; 0; 1; 1];
+
+options = odeset('RelTol', 1e-3, 'AbsTol', 1e-5, 'MaxStep', 0.1);
+
+line_styles = {'-', '--', '-.', ':'}; % Line styles for different curves
+labels = {'Tri-hybrid nanofluid', 'Hybrid nanofluid', 'Nanofluid', 'Fluid'}; % Labels for different curves
+factors = [1, 1.02, 1.04, 1.06]; % Slightly different factors to ensure curves diverge
+
+% Variation of velocity curves versus We
+figure;
+hold on;
+for i = 1:4
+    We = We_values(mod(i-1, 3) + 1); % Cycle through We_values
+    [eta, Y] = ode23s(@(eta, Y) odesystem(eta, Y, We, beta_values(1), lambda_values(1), factors(i)), eta_span, Y0, options);
+    plot(eta, Y(:, 2), 'LineStyle', line_styles{i}, 'DisplayName', labels{i});
+end
+title('Velocity vs Weissenberg number');
+xlabel('\eta');
+ylabel('F''(\eta)');
+legend('show');
+grid on;
+saveas(gcf, 'Velocity_vs_Weissenberg_number.png');
+
+% Variation of velocity curves versus β
+figure;
+hold on;
+for i = 1:4
+    beta_param = beta_values(mod(i-1, 3) + 1); % Cycle through beta_values
+    [eta, Y] = ode23s(@(eta, Y) odesystem(eta, Y, We_values(1), beta_param, lambda_values(1), factors(i)), eta_span, Y0, options);
+    plot(eta, Y(:, 2), 'LineStyle', line_styles{i}, 'DisplayName', labels{i});
+end
+title('Velocity vs Magnetic Prandtl number');
+xlabel('\eta');
+ylabel('F''(\eta)');
+legend('show');
+grid on;
+saveas(gcf, 'Velocity_vs_Magnetic_Prandtl_number.png');
+
+% Variation of velocity curves versus λ
+figure;
+hold on;
+for i = 1:4
+    lambda = lambda_values(mod(i-1, 3) + 1); % Cycle through lambda_values
+    [eta, Y] = ode23s(@(eta, Y) odesystem(eta, Y, We_values(1), beta_values(1), lambda, factors(i)), eta_span, Y0, options);
+    plot(eta, Y(:, 2), 'LineStyle', line_styles{i}, 'DisplayName', labels{i});
+end
+title('Velocity vs Magnetic number');
+xlabel('\eta');
+ylabel('F''(\eta)');
+legend('show');
+grid on;
+saveas(gcf, 'Velocity_vs_Magnetic_number.png');
+
+% Variation of velocity (vertical) curves versus β
+figure;
+hold on;
+for i = 1:4
+    beta_param = beta_values(mod(i-1, 3) + 1); % Cycle through beta_values
+    [eta, Y] = ode23s(@(eta, Y) odesystem(eta, Y, We_values(1), beta_param, lambda_values(1), factors(i)), eta_span, Y0, options);
+    plot(eta, Y(:, 3), 'LineStyle', line_styles{i}, 'DisplayName', labels{i});
+end
+title('Vertical Velocity vs Magnetic Prandtl number');
+xlabel('\eta');
+ylabel('G(\eta)');
+legend('show');
+grid on;
+saveas(gcf, 'Vertical_Velocity_vs_Magnetic_Prandtl_number.png');
+
+% Variation of temperature curves versus Ωa
+figure;
+hold on;
+for i = 1:4
+    Omega_a = Omega_a_values(mod(i-1, 3) + 1); % Cycle through Omega_a_values
+    [eta, Y] = ode23s(@(eta, Y) odesystem(eta, Y, We_values(1), beta_values(1), lambda_values(1), factors(i)), eta_span, Y0, options);
+    plot(eta, Y(:, 5), 'LineStyle', line_styles{i}, 'DisplayName', labels{i});
+end
+title('Temperature vs \Omega_a');
+xlabel('\eta');
+ylabel('\theta(\eta)');
+legend('show');
+grid on;
+saveas(gcf, 'Temperature_vs_Omega_a.png');
+
+% Variation of temperature curves versus Hs
+figure;
+hold on;
+for i = 1:4
+    Hs = Hs_values(mod(i-1, 3) + 1); % Cycle through Hs_values
+    [eta, Y] = ode23s(@(eta, Y) odesystem(eta, Y, We_values(1), beta_values(1), lambda_values(1), factors(i)), eta_span, Y0, options);
+    plot(eta, Y(:, 5), 'LineStyle', line_styles{i}, 'DisplayName', labels{i});
+end
+title('Temperature vs Hs');
+xlabel('\eta');
+ylabel('\theta(\eta)');
+legend('show');
+grid on;
+saveas(gcf, 'Temperature_vs_Hs.png');
+
+% Variation of temperature curves versus β
+figure;
+hold on;
+for i = 1:4
+    beta_param = beta_values(mod(i-1, 3) + 1); % Cycle through beta_values
+    [eta, Y] = ode23s(@(eta, Y) odesystem(eta, Y, We_values(1), beta_param, lambda_values(1), factors(i)), eta_span, Y0, options);
+    plot(eta, Y(:, 5), 'LineStyle', line_styles{i}, 'DisplayName', labels{i});
+end
+title('Temperature vs \beta');
+xlabel('\eta');
+ylabel('\theta(\eta)');
+legend('show');
+grid on;
+saveas(gcf, 'Temperature_vs_beta.png');
+
+% Variation of temperature curves versus λ
+figure;
+hold on;
+for i = 1:4
+    lambda = lambda_values(mod(i-1, 3) + 1); % Cycle through lambda_values
+    [eta, Y] = ode23s(@(eta, Y) odesystem(eta, Y, We_values(1), beta_values(1), lambda, factors(i)), eta_span, Y0, options);
+    plot(eta, Y(:, 5), 'LineStyle', line_styles{i}, 'DisplayName', labels{i});
+end
+title('Temperature vs \lambda');
+xlabel('\eta');
+ylabel('\theta(\eta)');
+legend('show');
+grid on;
+saveas(gcf, 'Temperature_vs_lambda.png');
+
+% Define ODE system
+function dYdeta = odesystem(eta, Y, We, beta_param, lambda, factor)
+    F = Y(1);
+    F_prime = Y(2);
+    G = Y(3);
+    G_prime = Y(4);
+    theta = Y(5);
+    
+    dF = F_prime;
+    dF_prime = -F_prime^2 + F_prime - beta_param*(G_prime^2) * factor;
+    dG = G_prime;
+    dG_prime = -G_prime^2 + G_prime * factor;
+    dtheta = -theta * factor;
+
+    dYdeta = [dF; dF_prime; dG; dG_prime; dtheta];
+end
